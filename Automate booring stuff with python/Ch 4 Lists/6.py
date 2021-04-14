@@ -1,0 +1,12 @@
+spam = ['cat', 'dog', 'bat']
+spam.append('moose')
+print(spam)
+spam.insert(1, 'chicken')
+print(spam)
+spam.remove('cat')
+print(spam)
+spam.insert(0, 'cat')
+spam.insert(0, 'cat')
+print(spam)
+spam.remove('cat')
+print(spam)
