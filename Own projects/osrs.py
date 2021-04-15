@@ -1,6 +1,9 @@
 import requests
 import pandas as pd
 import json
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 
 
 response = requests.get('https://prices.runescape.wiki/api/v1/osrs/latest') #Get price data
@@ -48,4 +51,35 @@ df2['id'] = df2['id'].astype(int) #Change ID datatype to INT
 df3 = pd.merge(df1, df2[['name','id']], on = 'id', how = 'left') #Adds item name as a column
 df3 = pd.merge(df3, df2[['limit','id']], on = 'id', how = 'left') #Adds trading limit
 #df3.to_csv (r'~/Projects/Own projects/df3.csv') - exports CSV fille
-print(df3)
+df3 = df3.fillna(0) #replace Nulls with 0s
+df4 = df3.values.tolist() #Formats Dataframe to list of lists
+
+
+
+
+
+
+
+#####   Write data to google sheet:   #####
+
+
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+SERVICE_ACCOUNT_FILE = 'keys.json'
+
+creds = None
+creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+
+
+# The ID spreadsheet.
+SAMPLE_SPREADSHEET_ID = '1rjZUQAE0Fah2XD4XZhGA1vRGMmzBCgjhhouisynlDGA'
+
+service = build('sheets', 'v4', credentials=creds)
+
+# Call the Sheets API
+sheet = service.spreadsheets()
+
+#In order for sheets to update, data must look like this: testdata = [["1/1/2021",5000],["1/1/2023",6000],["1/1/2020",7000]]
+
+request = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, 
+                                range="DF!A2", valueInputOption="RAW", body={"values":df4}).execute()
